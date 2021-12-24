@@ -4,6 +4,7 @@
     type PlayerData = {
         predictions: number[];
         met: boolean[];
+        made: number[];
         totals: number[];
     };
 
@@ -28,7 +29,7 @@
         trumps = [...Array.from({length: counts.length}).fill("")];
 
         for (const player of players) {
-            predictions[player] = { predictions: [], met: [], totals: [] };
+            predictions[player] = { predictions: [], met: [], totals: [], made: [] };
             tmpPredictions[player] = 0;
             tmpMade[player] = 0;
         }
@@ -42,9 +43,9 @@
                 } else {
                     draft[player].predictions.push(tmpPredictions[player]);
                 }
+                tmpPredictions[player] = 0;
             }
         });
-        tmpPredictions = {};
         gettingPredictions = false;
     }
 
@@ -53,12 +54,19 @@
             for (const player of players) {
                 const score = tmpMade[player] || 0;
                 const met = score === draft[player].predictions[currentRound];
+                const idx = draft[player].totals.length-1;
+                let prev = 0;
+                if (idx >= 0) {
+                    prev = draft[player].totals[idx];
+                }
                 draft[player].met.push(met);
                 if (met) {
-                    draft[player].totals.push(10 + score);
+                    draft[player].totals.push(prev + 10 + score);
                 } else {
-                    draft[player].totals.push(score);
+                    draft[player].totals.push(prev + score);
                 }
+                draft[player].made.push(score);
+                tmpMade[player] = 0;
             }
         });
 
@@ -142,9 +150,11 @@
                 {#each players as player}
                     <td>
                         <div class="w-full flex divide-x divide-gray-300">
-                            <span class="flex-1 text-center">{predictions[player].predictions[i] == null ? "" : predictions[player].predictions[i]}</span>
+                            <span class="flex-1 text-center {predictions[player].met[i] ? "text-green-500" : ""}">{predictions[player].predictions[i] == null ? "" : predictions[player].predictions[i]}</span>
                             <span class="flex-1 text-center">{
                                 predictions[player].totals[i] == null ? "" : predictions[player].totals[i]
+                            } {
+                                predictions[player].made[i] == null ? "" : `(${predictions[player].made[i]})`
                             }</span>
                         </div>
                     </td>

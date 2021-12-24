@@ -1,5 +1,10 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-static';
 import preprocess from 'svelte-preprocess';
+
+let paths = {};
+if (process.env.NODE_ENV === 'production') {
+	paths = { base: '/whist' };
+}
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -11,7 +16,8 @@ const config = {
 		adapter: adapter(),
 
 		// hydrate the <div id="svelte"> element in src/app.html
-		target: '#svelte'
+		target: '#svelte',
+		paths,
 	}
 };
 
