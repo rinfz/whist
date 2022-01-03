@@ -1,6 +1,10 @@
 <script lang="ts">
     import produce from "immer";
 
+    /*
+        TODO show who calls trump
+    */
+
     type PlayerData = {
         predictions: number[];
         met: boolean[];
@@ -71,11 +75,9 @@
         });
 
         currentRound += 1;
-        tmpMade = {};
         gettingPredictions = true;
 
         if (currentRound >= counts.length) {
-            playing = false;
             complete = true;
         }
     }
@@ -96,32 +98,37 @@
 </script>
 
 {#if playing}
-    {#if gettingPredictions}
-        <div class="w-1/2 grid grid-cols-2 gap-2">
-            {#each players as player}
-                <span>{player} predicts:</span>
-                <input bind:value={tmpPredictions[player]} type="number" class="border border-gray-300" />
-            {/each}
-        </div>
-        <div class="flex space-x-2 items-center">
-            <button on:click={donePredicting} class="btn disabled:opacity-50 mr-5" disabled={invalidPredict}>Done</button>
-            <button on:click={() => trumps[currentRound] = "♠"} class="mt-1 px-2 py-1 bg-gray-300 rounded-md disabled:opacity-50"
-                disabled={trumps[currentRound] === "♠"}>♠</button>
-            <button on:click={() => trumps[currentRound] = "♣"} class="mt-1 px-2 py-1 bg-gray-300 rounded-md disabled:opacity-50"
-                disabled={trumps[currentRound] === "♣"}>♣</button>
-            <button on:click={() => trumps[currentRound] = "♥"} class="mt-1 px-2 py-1 bg-gray-300 rounded-md disabled:opacity-50"
-                disabled={trumps[currentRound] === "♥"}>♥</button>
-            <button on:click={() => trumps[currentRound] = "♦"} class="mt-1 px-2 py-1 bg-gray-300 rounded-md disabled:opacity-50"
-                disabled={trumps[currentRound] === "♦"}>♦</button>
-        </div>
+    {#if complete}
+        <p>Game over.</p>
+        <p>{getWinner()} is the winner!</p>
     {:else}
-        <div class="w-1/2 grid grid-cols-2 gap-2">
-            {#each players as player}
-                <span>{player} made:</span>
-                <input bind:value={tmpMade[player]} type="number" class="border border-gray-300" />
-            {/each}
-        </div>
-        <button on:click={doneScoring} class="btn disabled:opacity-50" disabled={invalidMake}>Done</button>
+        {#if gettingPredictions}
+            <div class="w-1/2 grid grid-cols-2 gap-2">
+                {#each players as player}
+                    <span>{player} predicts:</span>
+                    <input bind:value={tmpPredictions[player]} type="number" class="border border-gray-300" />
+                {/each}
+            </div>
+            <div class="flex space-x-2 items-center">
+                <button on:click={donePredicting} class="btn disabled:opacity-50 mr-5" disabled={invalidPredict}>Done</button>
+                <button on:click={() => trumps[currentRound] = "♠"} class="mt-1 px-2 py-1 bg-gray-300 rounded-md disabled:opacity-50"
+                    disabled={trumps[currentRound] === "♠"}>♠</button>
+                <button on:click={() => trumps[currentRound] = "♣"} class="mt-1 px-2 py-1 bg-gray-300 rounded-md disabled:opacity-50"
+                    disabled={trumps[currentRound] === "♣"}>♣</button>
+                <button on:click={() => trumps[currentRound] = "♥"} class="mt-1 px-2 py-1 bg-gray-300 rounded-md disabled:opacity-50"
+                    disabled={trumps[currentRound] === "♥"}>♥</button>
+                <button on:click={() => trumps[currentRound] = "♦"} class="mt-1 px-2 py-1 bg-gray-300 rounded-md disabled:opacity-50"
+                    disabled={trumps[currentRound] === "♦"}>♦</button>
+            </div>
+        {:else}
+            <div class="w-1/2 grid grid-cols-2 gap-2">
+                {#each players as player}
+                    <span>{player} made:</span>
+                    <input bind:value={tmpMade[player]} type="number" class="border border-gray-300" />
+                {/each}
+            </div>
+            <button on:click={doneScoring} class="btn disabled:opacity-50" disabled={invalidMake}>Done</button>
+        {/if}
     {/if}
 
     <table class="table-fixed w-full">
@@ -163,9 +170,6 @@
             {/each}
         </tbody>
     </table>
-{:else if complete}
-    <p>Game over.</p>
-    <p>{getWinner()} is the winner!</p>
 {:else}
     <label for="playerList">
         <span>Who is playing?</span>
